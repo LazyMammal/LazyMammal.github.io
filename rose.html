@@ -22,20 +22,7 @@
     <script>
         (function () {
             var c_main = new fabric.StaticCanvas('c_main');
-
             c_main.radius = Math.min(c_main.width / 2, c_main.height / 2);
-            c_main.add(new fabric.Circle(
-                {
-                    top: c_main.width / 2,
-                    left: c_main.height / 2,
-                    radius: c_main.radius,
-                    stroke: 'black',
-                    strokeWidth: 1,
-                    opacity: .5,
-                    fill: '',
-                    originY: 'center',
-                    originX: 'center'
-                }));
 
             function makePolyline(points, options = null) {
                 var defOpts = {
@@ -81,15 +68,14 @@
                 }
                 return layers;
             }
-            var roseLayers = makeRose();
 
             function drawLayers(layers, x, y, scale) {
                 var lines = [];
                 for (var i = 0; i < layers.length; i++) {
                     var points = layers[i];
                     var scaledPoints = [];
-                    for( var p =0; p < points.length; p++){
-                        scaledPoints.push({x: points[p].x * scale, y: points[p].y * scale});
+                    for (var p = 0; p < points.length; p++) {
+                        scaledPoints.push({ x: points[p].x * scale, y: points[p].y * scale });
                     }
                     lines.push(makePolyline(scaledPoints));
                 }
@@ -101,8 +87,25 @@
                 });
                 return group;
             }
-            c_main.add(drawLayers(roseLayers, c_main.width / 2, c_main.height / 2, c_main.radius));
-            
+
+            // make rose garden
+            var roses = [];
+            const count = 3;
+            const cellX = c_main.width / count;
+            const cellY = c_main.height / count;
+
+            for (var y = 0; y < count; y++) {
+                for (var x = 0; x < count; x++) {
+                    var roseObj = {
+                        rose: makeRose(),
+                        x: (x + .5 + .25 * (Math.random() - .5)) * cellX,
+                        y: (y + .5 + .25 * (Math.random() - .5)) * cellY,
+                    };
+                    roses.push(roseObj);
+                    c_main.add(drawLayers(roseObj.rose, roseObj.x, roseObj.y, cellX / 2));
+                }
+            }
+
             var c_rose = new fabric.StaticCanvas('c_rose');
             c_rose.radius = Math.min(c_rose.width / 2, c_rose.height / 2);
             c_rose.add(drawLayers(makeRose(), c_rose.width / 6, c_rose.height / 2, c_rose.radius));
