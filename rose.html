@@ -53,12 +53,13 @@
                 return { x: dist * Math.sin(angle), y: dist * Math.cos(angle) };
             }
 
-            function makeSquiggle() {
+            function makeSquiggle(radius = null) {
+                radius = radius || Math.random();
                 var pts = [];
 
                 // first point
                 var a = Math.random() * Math.PI * 2;
-                var r = Math.random() * c_main.radius;
+                var r = radius * c_main.radius;
                 var p = polarPoint(a, r);
                 pts.push({ x: p.x + c_main.radius, y: p.y + c_main.radius });
 
@@ -74,8 +75,9 @@
                 return makePolyline(pts);
             }
 
-            for (var i = 0; i < 10; i++) {
-                c_main.add(makeSquiggle());
+            const max_layers = 15;
+            for (var i = 1; i <= max_layers; i++) {
+                c_main.add(makeSquiggle(i / max_layers));
             }
 
             var c_rose = new fabric.StaticCanvas('c_rose');
