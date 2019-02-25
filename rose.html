@@ -121,30 +121,50 @@
             let imageData = ctx.createImageData(canvas.width, canvas.height);
 
             let t1 = performance.now();
+
+            // get all individual line segments
+            let allLines = [];
+            let scale = cellX / 2;
+            for (let r = 0; r < roses.length; r++) {
+                let layers = roses[r].rose;
+                for (let i = 0; i < layers.length; i++) {
+                    let points = layers[i];
+                    for (let p = 1; p < points.length; p++) {
+                        let p1 = points[p - 1];
+                        let p2 = points[p];
+                        allLines.push([
+                            { x: p1.x + roses[r].x / scale, y: p1.y + roses[r].y / scale },
+                            { x: p2.x + roses[r].x / scale, y: p2.y + roses[r].y / scale }
+                        ]);
+                    }
+                }
+            }
+
             // Iterate through every pixel
             let i = 0;
             let max_d = null;
             for (let y = 0; y < canvas.height; y++) {
                 for (let x = 0; x < canvas.width && i < imageData.data.length; x++) {
 
-                    let p = {x: x / canvas.width, y: y / canvas.height};
-                    let v = {x: 0, y: 0};
-                    let w = {x: .50, y: .50};
+                    let p = { x: x / scale - 1, y: y / scale - 1};
 
-                    let d = distToSegment(p, v, w);
-
-                    if( i == 0 || d > max_d ) {
-                        max_d = d;
-                        console.log({x: x, y: y, d: d});
+                    let d = 1000;
+                    for (let i = 0; i < allLines.length; i++) {
+                        let points = allLines[i];
+                        d = Math.min(d, distToSegment(p, points[0], points[1]));
                     }
 
-                    let m = Math.pow(1-d, 2)
-                    let c = Math.min(255, Math.floor(m * 256));
+                    if (i == 0 || d > max_d) {
+                        max_d = d;
+                        //console.log({ x: x, y: y, d: d });
+                    }
+
+                    let c = Math.min(255, Math.floor((1 - d) * 256));
 
                     // Modify pixel data
                     imageData.data[i + 0] = c;  // R value
-                    imageData.data[i + 1] = 100;  // G value
-                    imageData.data[i + 2] = 128;  // B value
+                    imageData.data[i + 1] = c;  // G value
+                    imageData.data[i + 2] = c;  // B value
                     imageData.data[i + 3] = 255;  // A value
 
                     i += 4; // stride of pixel struct
@@ -153,6 +173,7 @@
             let t2 = performance.now();
             console.log(imageData);
             console.log(t2 - t1);
+            console.log(['max_d', max_d])
 
             ctx.putImageData(imageData, 0, 0);
 
