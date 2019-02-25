@@ -103,9 +103,10 @@
             c_main.add(drawLayers(roseLayers, c_main.width / 2, c_main.height / 2, c_main.radius));
             
             var c_rose = new fabric.StaticCanvas('c_rose');
-            c_rose.add(drawLayers(roseLayers, c_rose.width / 6, c_rose.height / 2, c_rose.height / 2));
-            c_rose.add(drawLayers(roseLayers, c_rose.width / 2, c_rose.height / 2, c_rose.height / 2));
-            c_rose.add(drawLayers(roseLayers, 5 * c_rose.width / 6, c_rose.height / 2, c_rose.height / 2));
+            c_rose.radius = Math.min(c_rose.width / 2, c_rose.height / 2);
+            c_rose.add(drawLayers(roseLayers, c_rose.width / 6, c_rose.height / 2, c_rose.radius));
+            c_rose.add(drawLayers(roseLayers, c_rose.width / 2, c_rose.height / 2, c_rose.radius));
+            c_rose.add(drawLayers(roseLayers, 5 * c_rose.width / 6, c_rose.height / 2, c_rose.radius));
 
         })();
     </script>
