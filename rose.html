@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://rawgit.com/kangax/fabric.js/master/dist/fabric.min.js"></script>
+    <style>
+        .diagram {
+            margin: 3px;
+        }
+
+        .diagram canvas {
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="diagram"> <canvas id="c_main" width="300" height="300"></canvas></div>
+    <div class="diagram"> <canvas id="c_rose" width="300" height="100"></canvas></div>
+    <script>
+        (function () {
+            var c_main = new fabric.StaticCanvas('c_main');
+            //console.log(c_main);
+
+            c_main.radius = Math.min(c_main.width / 2, c_main.height / 2);
+            c_main.add(new fabric.Circle(
+                {
+                    top: c_main.width / 2,
+                    left: c_main.height / 2,
+                    radius: c_main.radius,
+                    stroke: 'black',
+                    strokeWidth: 1,
+                    opacity: .5,
+                    fill: '',
+                    originY: 'center',
+                    originX: 'center'
+                }));
+
+            function makePolyline(points, options = null) {
+                var defOpts = {
+                    stroke: 'red',
+                    strokeWidth: 3,
+                    strokeLineCap: 'round',
+                    strokeLineJoin: 'round',
+                    fill: '',
+                }
+                const allOpts = Object.assign({}, defOpts, options);
+                return new fabric.Polyline(points, allOpts);
+            }
+
+            function polarPoint(angle, dist) {
+                return { x: dist * Math.sin(angle), y: dist * Math.cos(angle) };
+            }
+
+            function makeSquiggle() {
+                var pts = [];
+
+                // first point
+                var a = Math.random() * Math.PI * 2;
+                var r = Math.random() * c_main.radius;
+                var p = polarPoint(a, r);
+                pts.push({ x: p.x + c_main.radius, y: p.y + c_main.radius });
+
+                // trailing segments
+                var segs = Math.floor(Math.random() * 2) + 5;
+                for (var i = 0; i < segs; i++) {
+                    a += Math.PI / 16;
+                    r += (Math.random() - .5) * c_main.radius / 10;
+                    p = polarPoint(a, r);
+                    pts.push({ x: p.x + c_main.radius, y: p.y + c_main.radius });
+                }
+
+                return makePolyline(pts);
+            }
+
+            for (var i = 0; i < 10; i++) {
+                c_main.add(makeSquiggle());
+            }
+
+            var c_rose = new fabric.StaticCanvas('c_rose');
+            //c_rose.add(renderPath);
+
+        })();
+    </script>
+</body>
+
+</html>
