@@ -21,7 +21,6 @@
     <script>
         (function () {
             var c_main = new fabric.StaticCanvas('c_main');
-            //console.log(c_main);
 
             c_main.radius = Math.min(c_main.width / 2, c_main.height / 2);
             c_main.add(new fabric.Circle(
@@ -43,7 +42,7 @@
                     strokeWidth: 3,
                     strokeLineCap: 'round',
                     strokeLineJoin: 'round',
-                    fill: '',
+                    fill: ''
                 }
                 const allOpts = Object.assign({}, defOpts, options);
                 return new fabric.Polyline(points, allOpts);
@@ -59,14 +58,14 @@
 
                 // first point
                 var a = Math.random() * Math.PI * 2;
-                var r = radius * c_main.radius;
+                var r = radius;
                 pts.push(polarPoint(a, r));
 
                 // trailing segments
                 var segs = Math.floor(Math.random() * 2) + 5;
                 for (var i = 0; i < segs; i++) {
                     a += Math.PI / 16;
-                    r += (Math.random() - .5) * c_main.radius / 10;
+                    r += (Math.random() - .5) / 10;
                     pts.push(polarPoint(a, r));
                 }
 
@@ -83,21 +82,30 @@
             }
             var roseLayers = makeRose();
 
-            function showLayers(layers) {
+            function drawLayers(layers, x, y, scale) {
                 var lines = [];
                 for (var i = 0; i < layers.length; i++) {
                     var points = layers[i];
-                    lines.push(makePolyline(points));
+                    var scaledPoints = [];
+                    for( var p =0; p < points.length; p++){
+                        scaledPoints.push({x: points[p].x * scale, y: points[p].y * scale});
+                    }
+                    lines.push(makePolyline(scaledPoints));
                 }
                 var group = new fabric.Group(lines, {
-                    left: c_main.width / 2,
-                    top: c_main.height / 2,
+                    left: x,
+                    top: y,
                     originY: 'center',
                     originX: 'center'
                 });
-                c_main.add(group);
+                return group;
             }
-            showLayers(roseLayers);
+            c_main.add(drawLayers(roseLayers, c_main.width / 2, c_main.height / 2, c_main.radius));
+            
+            var c_rose = new fabric.StaticCanvas('c_rose');
+            c_rose.add(drawLayers(roseLayers, c_rose.width / 6, c_rose.height / 2, c_rose.height / 2));
+            c_rose.add(drawLayers(roseLayers, c_rose.width / 2, c_rose.height / 2, c_rose.height / 2));
+            c_rose.add(drawLayers(roseLayers, 5 * c_rose.width / 6, c_rose.height / 2, c_rose.height / 2));
 
         })();
     </script>
