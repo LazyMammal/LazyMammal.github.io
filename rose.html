@@ -60,28 +60,44 @@
                 // first point
                 var a = Math.random() * Math.PI * 2;
                 var r = radius * c_main.radius;
-                var p = polarPoint(a, r);
-                pts.push({ x: p.x + c_main.radius, y: p.y + c_main.radius });
+                pts.push(polarPoint(a, r));
 
                 // trailing segments
                 var segs = Math.floor(Math.random() * 2) + 5;
                 for (var i = 0; i < segs; i++) {
                     a += Math.PI / 16;
                     r += (Math.random() - .5) * c_main.radius / 10;
-                    p = polarPoint(a, r);
-                    pts.push({ x: p.x + c_main.radius, y: p.y + c_main.radius });
+                    pts.push(polarPoint(a, r));
                 }
 
-                return makePolyline(pts);
+                return pts;
             }
 
-            const max_layers = 15;
-            for (var i = 1; i <= max_layers; i++) {
-                c_main.add(makeSquiggle(i / max_layers));
+            function makeRose() {
+                var layers = [];
+                const max_layers = 15;
+                for (var i = 1; i <= max_layers; i++) {
+                    layers.push(makeSquiggle(i / max_layers));
+                }
+                return layers;
             }
+            var roseLayers = makeRose();
 
-            var c_rose = new fabric.StaticCanvas('c_rose');
-            //c_rose.add(renderPath);
+            function showLayers(layers) {
+                var lines = [];
+                for (var i = 0; i < layers.length; i++) {
+                    var points = layers[i];
+                    lines.push(makePolyline(points));
+                }
+                var group = new fabric.Group(lines, {
+                    left: c_main.width / 2,
+                    top: c_main.height / 2,
+                    originY: 'center',
+                    originX: 'center'
+                });
+                c_main.add(group);
+            }
+            showLayers(roseLayers);
 
         })();
     </script>
