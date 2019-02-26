@@ -100,9 +100,10 @@
                         rose: makeRose(),
                         x: (x + .5 + .25 * (Math.random() - .5)) * cellX,
                         y: (y + .5 + .25 * (Math.random() - .5)) * cellY,
+                        scale: cellX / 2
                     };
                     roses.push(roseObj);
-                    c_main.add(drawLayers(roseObj.rose, roseObj.x, roseObj.y, cellX / 2));
+                    c_main.add(drawLayers(roseObj.rose, roseObj.x, roseObj.y, roseObj.scale));
                 }
             }
 
@@ -133,8 +134,8 @@
                         let p1 = points[p - 1];
                         let p2 = points[p];
                         allLines.push([
-                            { x: p1.x + roses[r].x / scale, y: p1.y + roses[r].y / scale },
-                            { x: p2.x + roses[r].x / scale, y: p2.y + roses[r].y / scale }
+                            { x: p1.x + roses[r].x / roses[r].scale, y: p1.y + roses[r].y / roses[r].scale },
+                            { x: p2.x + roses[r].x / roses[r].scale, y: p2.y + roses[r].y / roses[r].scale }
                         ]);
                     }
                 }
