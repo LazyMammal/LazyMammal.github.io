@@ -116,9 +116,9 @@
 
             // 3d scene render
             let scene = new THREE.Scene();
-            let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            let camera = new THREE.PerspectiveCamera(50, 300 / 300, 0.1, 1000);
             let renderer = new THREE.WebGLRenderer();
-            renderer.setSize(300, 300); //window.innerWidth, window.innerHeight
+            renderer.setSize(300, 300);
             document.body.appendChild(renderer.domElement);
             let camL = 150;
             let camZ = 150;
@@ -206,9 +206,16 @@
 
                 light.position.copy(camera.position);
                 renderer.render(scene, camera);
+
             };
             if (render_end - render_start < 200.0)
                 animate();
+
+            if (false) {
+                renderer.aspect = window.innerWidth / window.innerHeight;
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.updateProjectionMatrix();
+            }
 
             let t2 = performance.now();
             console.log(t2 - t1, "total (ms)")
