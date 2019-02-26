@@ -107,22 +107,6 @@
                 }
             }
 
-            function distToSegment(p, v, w) {
-                let l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
-                if (l2 == 0)
-                    return Math.pow(p.x - v.x, 2) + Math.pow(p.y - v.y, 2);
-                let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
-                t = Math.max(0, Math.min(1, t));
-                return Math.sqrt(Math.pow(v.x + t * (w.x - v.x) - p.x, 2) + Math.pow(v.y + t * (w.y - v.y) - p.y, 2));
-            }
-
-            // from here using Canvas directly (not FabricJS)
-            let canvas = document.getElementById('c_sdf');
-            let ctx = canvas.getContext('2d');
-            let imageData = ctx.createImageData(canvas.width, canvas.height);
-
-            let t1 = performance.now();
-
             // get all individual line segments
             let allLines = [];
             let scale = cellX / 2;
@@ -140,43 +124,6 @@
                     }
                 }
             }
-
-            // Iterate through every pixel
-            let i = 0;
-            let max_d = null;
-            for (let y = 0; y < canvas.height; y++) {
-                for (let x = 0; x < canvas.width && i < imageData.data.length; x++) {
-
-                    let p = { x: x / scale - 1, y: y / scale - 1};
-
-                    let d = 1000;
-                    for (let i = 0; i < allLines.length; i++) {
-                        let points = allLines[i];
-                        d = Math.min(d, distToSegment(p, points[0], points[1]));
-                    }
-
-                    if (i == 0 || d > max_d) {
-                        max_d = d;
-                        //console.log({ x: x, y: y, d: d });
-                    }
-
-                    let c = Math.min(255, Math.floor((1 - d) * 256));
-
-                    // Modify pixel data
-                    imageData.data[i + 0] = c;  // R value
-                    imageData.data[i + 1] = c;  // G value
-                    imageData.data[i + 2] = c;  // B value
-                    imageData.data[i + 3] = 255;  // A value
-
-                    i += 4; // stride of pixel struct
-                }
-            }
-            let t2 = performance.now();
-            console.log(imageData);
-            console.log(t2 - t1);
-            console.log(['max_d', max_d])
-
-            ctx.putImageData(imageData, 0, 0);
 
         })();
     </script>
