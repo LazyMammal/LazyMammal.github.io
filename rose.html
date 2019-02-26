@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <script src="https://rawgit.com/kangax/fabric.js/master/dist/fabric.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/101/three.min.js"></script>
     <style>
         .diagram {
             margin: 3px;
@@ -16,18 +17,18 @@
 </head>
 
 <body>
-    <div class="diagram"> <canvas id="c_main" width="300" height="300"></canvas></div>
-    <div class="diagram"> <canvas id="c_sdf" width="400" height="400"></canvas></div>
-    <a href="javascript:location.reload(true)">Generate</a>
+    <input type="button" value="Generate" onclick="javascript:location.reload(true)">
+    <div class="diagram"> <canvas id="c_main" width="300" height="300"></canvas> </div>
     <script>
         (function () {
+            let t1 = performance.now();
             let c_main = new fabric.StaticCanvas('c_main');
             c_main.radius = Math.min(c_main.width / 2, c_main.height / 2);
 
             function makePolyline(points, options = null) {
                 let defOpts = {
                     stroke: 'red',
-                    strokeWidth: 3,
+                    strokeWidth: 1,
                     strokeLineCap: 'round',
                     strokeLineJoin: 'round',
                     fill: ''
@@ -43,11 +44,14 @@
             function makeSquiggle(radius = null) {
                 radius = radius || Math.random();
                 let pts = [];
+                let pts2 = [];
+                let thick = .9;
 
                 // first point
                 let a = Math.random() * Math.PI * 2;
                 let r = radius;
                 pts.push(polarPoint(a, r));
+                pts2.push(polarPoint(a, r * thick));
 
                 // trailing segments
                 let segs = Math.floor(Math.random() * 2) + 5;
@@ -55,9 +59,11 @@
                     a += Math.PI / 16;
                     r += (Math.random() - .5) / 10;
                     pts.push(polarPoint(a, r));
+                    pts2.push(polarPoint(a, r * thick));
                 }
 
-                return pts;
+                // double up pts to return path
+                return pts.concat(pts2.reverse(), pts[0]);
             }
 
             function makeRose() {
@@ -90,12 +96,12 @@
 
             // make rose garden
             let roses = [];
-            const count = 3;
-            const cellX = c_main.width / count;
-            const cellY = c_main.height / count;
+            const cellCount = 3;
+            const cellX = c_main.width / cellCount;
+            const cellY = c_main.height / cellCount;
 
-            for (let y = 0; y < count; y++) {
-                for (let x = 0; x < count; x++) {
+            for (let y = 0; y < cellCount; y++) {
+                for (let x = 0; x < cellCount; x++) {
                     let roseObj = {
                         rose: makeRose(),
                         x: (x + .5 + .25 * (Math.random() - .5)) * cellX,
@@ -107,24 +113,95 @@
                 }
             }
 
-            // get all individual line segments
-            let allLines = [];
-            let scale = cellX / 2;
-            for (let r = 0; r < roses.length; r++) {
+            function getRoseShape(r) {
+                let lines = [];
                 let layers = roses[r].rose;
                 for (let i = 0; i < layers.length; i++) {
                     let points = layers[i];
-                    for (let p = 1; p < points.length; p++) {
-                        let p1 = points[p - 1];
+                    for (let p = 0; p < points.length; p++) {
                         let p2 = points[p];
-                        allLines.push([
-                            { x: p1.x + roses[r].x / roses[r].scale, y: p1.y + roses[r].y / roses[r].scale },
-                            { x: p2.x + roses[r].x / roses[r].scale, y: p2.y + roses[r].y / roses[r].scale }
-                        ]);
+                        lines.push({ x: p2.x + roses[r].x / roses[r].scale, y: p2.y + roses[r].y / roses[r].scale });
                     }
+                }
+                return lines;
+            }
+
+            // 3d scene render
+            let scene = new THREE.Scene();
+            let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            let renderer = new THREE.WebGLRenderer();
+            renderer.setSize(300, 300); //window.innerWidth, window.innerHeight
+            document.body.appendChild(renderer.domElement);
+            camera.position.set(0, 100, 150);
+            camera.up = new THREE.Vector3(0,0,1);
+            camera.lookAt(0, 0, 0);
+
+            // lighting
+            scene.add(new THREE.AmbientLight(0x222222));
+            let light = new THREE.PointLight(0xffffff);
+            light.position.copy(camera.position);
+            scene.add(light);
+
+            function extrudeShape(layer, x=0, y=0, scale=1) {
+
+                //let material = new THREE.MeshBasicMaterial({ color: 0xb00000, wireframe: true  });
+                let material = new THREE.MeshLambertMaterial({ color: 0xb00000, wireframe: false });
+
+                let extrudeSettings = {
+                    depth: 35,
+                    steps: 2,
+                    bevelEnabled: false,
+                    /*
+                    bevelThickness: 2,
+                    bevelSize: 1,
+                    bevelSegments: 1
+                    */
+                };
+
+                let pts = layer.slice();
+                for (let i = 0; i < pts.length; i++) {
+                    pts[i] = new THREE.Vector2(pts[i].x * scale + x, pts[i].y * scale + y);
+                }
+                let shape = new THREE.Shape(pts);
+                let geometry = new THREE.ExtrudeBufferGeometry(shape, extrudeSettings);
+                return new THREE.Mesh(geometry, material);
+            }
+
+            // extrude roses
+            let meshArr = [];
+            for (let r = 0; r < roses.length; r++) {
+                for (let l = 0; l < roses[r].rose.length; l++) {
+                    let layer = roses[r].rose[l];
+                    let s = roses[r].scale;
+                    let x = roses[r].x - 3 * s;
+                    let y = roses[r].y - 3 * s;
+                    let mesh = extrudeShape(layer, x, y, s);
+                    if( r == 0 && l ==0 ) console.log(mesh);
+                    meshArr.push(mesh);
+                    scene.add(mesh);
                 }
             }
 
+            // one-time render
+            renderer.render(scene, camera);
+
+            // animation loop
+            let camA = 0;
+            let camL = 100;
+            let animate = function () {
+                requestAnimationFrame(animate);
+
+                camA += 0.01;
+                camera.position.set(Math.sin(camA) * camL, Math.cos(camA) * camL, 150);
+                camera.lookAt(0, 0, 0);
+
+                light.position.copy(camera.position);
+                renderer.render(scene, camera);
+            };
+            animate();
+
+
+            console.log(performance.now() - t1, "ms")
         })();
     </script>
 </body>
