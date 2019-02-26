@@ -68,9 +68,10 @@
 
             function makeRose() {
                 let layers = [];
-                const max_layers = 15;
+                const max_layers = 25;
+                const radius = .9;
                 for (let i = 1; i <= max_layers; i++) {
-                    layers.push(makeSquiggle(i / max_layers));
+                    layers.push(makeSquiggle(radius * i / max_layers));
                 }
                 return layers;
             }
@@ -169,6 +170,16 @@
                 return new THREE.Mesh(geometry, material);
             }
 
+            function centroid2(pts) {
+                let ctr = new THREE.Vector2(0, 0);
+                for (let i = 0; i < pts.length; i++) {
+                    let p = new THREE.Vector2(pts[i].x, pts[i].y);
+                    ctr.add(p);
+                }
+                ctr.divideScalar(pts.length);
+                return ctr;
+            }
+
             // extrude roses
             let meshArr = [];
             for (let r = 0; r < roses.length; r++) {
@@ -177,7 +188,14 @@
                     let s = roses[r].scale;
                     let x = roses[r].x - 3 * s;
                     let y = roses[r].y - 3 * s;
-                    let mesh = extrudeShape(layer, x, y, s);
+                    let mesh = extrudeShape(layer, 0, 0, s);
+                    let ctr = centroid2(layer);
+                    let axis = new THREE.Vector3(camera.up);
+                    axis.crossVectors(new THREE.Vector3(ctr.x, ctr.y, 0), camera.up);
+                    mesh.rotateOnAxis(axis, -.5);
+                    mesh.position.x = x;
+                    mesh.position.y = y;
+
                     if (r == 0 && l == 0) console.log(mesh);
                     meshArr.push(mesh);
                     scene.add(mesh);
