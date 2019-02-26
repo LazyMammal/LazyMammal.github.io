@@ -45,13 +45,14 @@
                 radius = radius || Math.random();
                 let pts = [];
                 let pts2 = [];
-                let thick = .9;
+                let thick = 1. - .025;
+                let pad = .05;
 
                 // first point
                 let a = Math.random() * Math.PI * 2;
                 let r = radius;
                 pts.push(polarPoint(a, r));
-                pts2.push(polarPoint(a, r * thick));
+                pts2.push(polarPoint(a, r * thick - pad));
 
                 // trailing segments
                 let segs = Math.floor(Math.random() * 2) + 5;
@@ -59,7 +60,7 @@
                     a += Math.PI / 16;
                     r += (Math.random() - .5) / 10;
                     pts.push(polarPoint(a, r));
-                    pts2.push(polarPoint(a, r * thick));
+                    pts2.push(polarPoint(a, r * thick - pad));
                 }
 
                 // double up pts to return path
@@ -69,7 +70,7 @@
             function makeRose() {
                 let layers = [];
                 const max_layers = 25;
-                const radius = .9;
+                const radius = .75;
                 for (let i = 1; i <= max_layers; i++) {
                     layers.push(makeSquiggle(radius * i / max_layers));
                 }
@@ -138,8 +139,8 @@
                 let material = new THREE.MeshLambertMaterial({ color: 0xb00000, wireframe: false });
 
                 let extrudeSettings = {
-                    depth: 35,
-                    steps: 2,
+                    depth: 50,
+                    steps: 3,
                     bevelEnabled: false,
                     /*
                     bevelThickness: 2,
@@ -179,7 +180,7 @@
                     let ctr = centroid2(layer);
                     let axis = new THREE.Vector3(camera.up);
                     axis.crossVectors(new THREE.Vector3(ctr.x, ctr.y, 0), camera.up);
-                    mesh.rotateOnAxis(axis, -.5);
+                    mesh.rotateOnAxis(axis, -.9);       // rotate base of petal towards local origin
                     mesh.position.x = x;
                     mesh.position.y = y;
 
