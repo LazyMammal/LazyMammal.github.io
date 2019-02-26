@@ -135,7 +135,7 @@
             let camL = 150;
             let camZ = 150;
             camera.position.set(0, camL, camZ);
-            camera.up = new THREE.Vector3(0,0,1);
+            camera.up = new THREE.Vector3(0, 0, 1);
             camera.lookAt(0, 0, 0);
 
             // lighting
@@ -144,7 +144,7 @@
             light.position.copy(camera.position);
             scene.add(light);
 
-            function extrudeShape(layer, x=0, y=0, scale=1) {
+            function extrudeShape(layer, x = 0, y = 0, scale = 1) {
 
                 //let material = new THREE.MeshBasicMaterial({ color: 0xb00000, wireframe: true  });
                 let material = new THREE.MeshLambertMaterial({ color: 0xb00000, wireframe: false });
@@ -178,14 +178,17 @@
                     let x = roses[r].x - 3 * s;
                     let y = roses[r].y - 3 * s;
                     let mesh = extrudeShape(layer, x, y, s);
-                    if( r == 0 && l ==0 ) console.log(mesh);
+                    if (r == 0 && l == 0) console.log(mesh);
                     meshArr.push(mesh);
                     scene.add(mesh);
                 }
             }
 
             // one-time render
+            let render_start = performance.now();
             renderer.render(scene, camera);
+            let render_end = performance.now();
+            console.log(render_end - render_start, "render (ms)")
 
             // animation loop
             let camA = 0;
@@ -199,10 +202,11 @@
                 light.position.copy(camera.position);
                 renderer.render(scene, camera);
             };
-            animate();
+            if (render_end - render_start < 200.0)
+                animate();
 
-
-            console.log(performance.now() - t1, "ms")
+            let t2 = performance.now();
+            console.log(t2 - t1, "total (ms)")
         })();
     </script>
 </body>
