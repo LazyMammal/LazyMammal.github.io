@@ -114,19 +114,6 @@
                 }
             }
 
-            function getRoseShape(r) {
-                let lines = [];
-                let layers = roses[r].rose;
-                for (let i = 0; i < layers.length; i++) {
-                    let points = layers[i];
-                    for (let p = 0; p < points.length; p++) {
-                        let p2 = points[p];
-                        lines.push({ x: p2.x + roses[r].x / roses[r].scale, y: p2.y + roses[r].y / roses[r].scale });
-                    }
-                }
-                return lines;
-            }
-
             // 3d scene render
             let scene = new THREE.Scene();
             let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
