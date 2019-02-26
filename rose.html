@@ -128,11 +128,13 @@
 
             // 3d scene render
             let scene = new THREE.Scene();
-            let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            let camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
             let renderer = new THREE.WebGLRenderer();
             renderer.setSize(300, 300); //window.innerWidth, window.innerHeight
             document.body.appendChild(renderer.domElement);
-            camera.position.set(0, 100, 150);
+            let camL = 150;
+            let camZ = 150;
+            camera.position.set(0, camL, camZ);
             camera.up = new THREE.Vector3(0,0,1);
             camera.lookAt(0, 0, 0);
 
@@ -187,12 +189,11 @@
 
             // animation loop
             let camA = 0;
-            let camL = 100;
             let animate = function () {
                 requestAnimationFrame(animate);
 
                 camA += 0.01;
-                camera.position.set(Math.sin(camA) * camL, Math.cos(camA) * camL, 150);
+                camera.position.set(Math.sin(camA) * camL, Math.cos(camA) * camL, camZ);
                 camera.lookAt(0, 0, 0);
 
                 light.position.copy(camera.position);
