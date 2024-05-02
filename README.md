@@ -1,1 +1,1 @@
-# LazyMammal.github.io
+# [LazyMammal.github.io](https://lazymammal.github.io/)
